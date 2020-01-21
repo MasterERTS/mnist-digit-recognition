@@ -12,7 +12,7 @@ from mnist import MNIST
 # https://stackoverflow.com/questions/44115411/mnist-training-error-in-for-loop
 # https://github.com/louisjc/mnist-neural-network
 
-mndata = MNIST('/home/erwin/Documents/coro/artin-neuralnetworks/data')
+mndata = MNIST('../res/')
 mndata.gz = True
 images, labels = mndata.load_training()
 
