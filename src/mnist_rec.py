@@ -1,33 +1,51 @@
 import numpy as np
 import math
 import random
+import matplotlib.pyplot as plt
 import sys
 from os import path
-sys.path.append( path.dirname( path.dirname( path.abspath(__file__) ) ) )
-from lib.util import *
+sys.path.append(path.dirname(path.dirname(path.abspath(__file__))))
 
-from mnist import MNIST
+import mnist_parser as mnist
+from lib.neural_network import NeuralNetwork
 
-# https://github.com/kdexd/digit-classifier/blob/master/main.py
-# https://stackoverflow.com/questions/44115411/mnist-training-error-in-for-loop
-# https://github.com/louisjc/mnist-neural-network
+def print_random_image():
+    testing_images = mnist.test_images()
+    testing_labels = mnist.test_labels()
 
-output_layer = 10
+    picked_image = random.randint(0, min(len(testing_images), len(testing_labels)))
 
-mndata = MNIST('../res/')
-mndata.gz = True
-training_images, training_labels = mndata.load_training()
-testing_images, testing_labels = mndata.load_testing()
+    img = testing_images[picked_image].reshape((28, 28))
+    plt.imshow(img, cmap="Greys")
+    plt.title(testing_labels[picked_image])
+    plt.show()
 
-training_inputs = training_images.reshape(training_images.shape[0], training_images.shape[1] * training_images.shape[2]).astype('float32')
-normalized_inputs = training_inputs/255
-normalized_outputs = np.eye(output_layer)[training_labels]
+def main():
+    output_layer = 10
 
-testing_inputs = testing_images.reshape(testing_images.shape[0], testing_images.shape[1]*testing_images.shape[2]).astype('float32')
-norm_test_inputs= testing_inputs/255
-norm_test_outputs = testing_labels
+    training_images = mnist.train_images()
+    training_labels = mnist.train_labels()
+    testing_images = mnist.test_images()
+    testing_labels = mnist.test_labels()
 
-layers = [784, 30, 10]
-learning_rate = 0.05
-batch_size = 1
-epochs = 100
+    training_inputs = training_images.reshape(
+        training_images.shape[0], training_images.shape[1] * training_images.shape[2]).astype('float32')
+    normalized_inputs = training_inputs/255
+    normalized_outputs = np.eye(output_layer)[training_labels]
+
+    testing_inputs = testing_images.reshape(
+        testing_images.shape[0], testing_images.shape[1]*testing_images.shape[2]).astype('float32')
+    norm_test_inputs = testing_inputs/255
+    norm_test_outputs = testing_labels
+
+    layers = [784, 30, 10]
+    learning_rate = 0.05
+    batch_size = 1
+    epochs = 10000
+
+    nn = NeuralNetwork(layers, batch_size, epochs, learning_rate)
+    nn.fit(normalized_inputs, normalized_outputs)
+    nn.accuracy_test(norm_test_inputs, norm_test_outputs)
+
+if __name__ == "__main__":
+    main()
