@@ -39,7 +39,7 @@ def main():
     norm_test_outputs = testing_labels
 
     layers = [784, 30, 10]
-    learning_rate = 0.05
+    learning_rate = 0.001
     batch_size = 1
     epochs = 5
 
