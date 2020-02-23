@@ -20,7 +20,6 @@ class NeuralNetwork():
             self.biases.append(np.zeros((1, self.layers[i+1])))
 
     def feed_forward(self, inputs):
-        inputs = inputs.astype(float)
 
         layer0 = inputs
         layer1 = mathlib.relu(np.dot(layer0, self.weights[0]) + self.biases[0])
@@ -36,9 +35,9 @@ class NeuralNetwork():
         return loss
 
     def back_propagate(self, inputs, hidden_layer, predicted_outputs, outputs):
-        delta_y = (outputs - predicted_outputs) / predicted_outputs.shape[0]
+        delta_y = (predicted_outputs - outputs) / predicted_outputs.shape[0]
         delta_hidden_layer = np.dot(delta_y, self.weights[1].T)
-        delta_hidden_layer = mathlib.relu_prime(delta_hidden_layer)
+        delta_hidden_layer[hidden_layer <= 0] = 0
 
         w2_grad = np.dot(hidden_layer.T, delta_y)
         b2_grad = np.sum(delta_y, axis=0, keepdims=True)
@@ -46,33 +45,37 @@ class NeuralNetwork():
         w1_grad = np.dot(inputs.T, delta_hidden_layer)
         b1_grad = np.sum(delta_hidden_layer, axis=0, keepdims=True)
 
-        # w2_grad += 0.01 * self.weights[1]
-        # w1_grad += 0.01 * self.weights[0]
+        w2_grad += 0.01 * self.weights[1]
+        w1_grad += 0.01 * self.weights[0]
 
-        self.weights[0] += self.learning_rate * w1_grad
-        self.biases[0] += self.learning_rate * b1_grad
+        self.weights[0] -= self.learning_rate * w1_grad
+        self.biases[0] -= self.learning_rate * b1_grad
 
-        self.weights[1] += self.learning_rate * w2_grad
-        self.biases[1] += self.learning_rate * b2_grad
+        self.weights[1] -= self.learning_rate * w2_grad
+        self.biases[1] -= self.learning_rate * b2_grad
 
     def fit(self, inputs, outputs):
         for epoch in range(self.epochs):
             it = 0
-            while (it < len(inputs)):
-                inputs = inputs[it:it+self.batch_size]
-                outputs = outputs[it:it+self.batch_size]
-                hidden_layer, output_layer = self.feed_forward(inputs)
-                loss = self.loss_function(output_layer, outputs)
+            while it < len(inputs):
+                inputs_batch = inputs[it:it+self.batch_size]
+                outputs_batch = outputs[it:it+self.batch_size]
+                hidden_layer, output_layer = self.feed_forward(inputs_batch)
+                loss = self.loss_function(output_layer, outputs_batch)
                 self.loss.append(loss)
-                self.back_propagate(inputs, hidden_layer,
-                                    output_layer, outputs)
+                self.back_propagate(inputs_batch, hidden_layer,
+                                    output_layer, outputs_batch)
+
+                '''print('=== Epoch: {:d}/{:d}\tIteration:{:d}\tLoss: {:.2f} ==='.format(
+                    epoch+1, self.epochs, it+1, loss))'''
+                it += self.batch_size
 
     def predict(self, inputs):
-        prediction = self.feed_forward(inputs)
-        print("Result to your output is === " + prediction)
+        hidden_layer, prediction = self.feed_forward(inputs)
+        return prediction
 
     def accuracy_test(self, inputs, result):
-        prediction = self.feed_forward(inputs)
+        prediction = self.predict(inputs)
         acc = float(np.sum(np.argmax(prediction, 1) == result)) / \
             float(len(result))
-        print('Test accuracy : {:.2f}%').format(acc*100)
+        print('Test accuracy : {:.2f}%'.format(acc*100))
