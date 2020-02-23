@@ -41,7 +41,7 @@ def main():
     layers = [784, 30, 10]
     learning_rate = 0.05
     batch_size = 1
-    epochs = 10000
+    epochs = 5
 
     nn = NeuralNetwork(layers, batch_size, epochs, learning_rate)
     nn.fit(normalized_inputs, normalized_outputs)
