@@ -10,11 +10,12 @@ def sigmoid_prime(z):
 
 
 def relu(z):
-    return np.max(z, 0)
+    return np.maximum(z, 0)
 
 
 def relu_prime(z):
     return np.where(z > 0, 1.0, 0.0)
+
 
 def softmax(z):
     exp = np.exp(z)
