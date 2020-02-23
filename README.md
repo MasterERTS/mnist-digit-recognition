@@ -7,7 +7,7 @@
 Based on handwritten digits - which a sampled is displayed hereinabove -  stored in the MNIST database (/res/...) and parsed by the great and useful toolbox [mnist](https://github.com/datapythonista/mnist) written by [Marc Garcia](https://github.com/datapythonista). This program uses feedforward and backpropagation in a 3-layers Neural Network seen below to learn how to recognize the former mentionned digits :
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/master-coro/mnist-digit-recognition/master/res/iHDtO.png.png">
+<img src="https://raw.githubusercontent.com/master-coro/mnist-digit-recognition/master/res/iHDtO.png">
 </p>
 
 ## Done
