@@ -65,7 +65,7 @@ class NeuralNetwork():
         self.weights[1] -= self.learning_rate * w2_grad
         self.biases[1] -= self.learning_rate * b2_grad
 
-    def fit(self, inputs, outputs, clear = False):
+    def fit(self, inputs, outputs, clear=False):
         for epoch in range(self.epochs):
             it = 0
             while it < len(inputs):
@@ -79,6 +79,9 @@ class NeuralNetwork():
                 self.back_propagate(inputs_batch, hidden_layer,
                                     output_layer, outputs_batch)
 
+                loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.OKBLUE + "Loss: {:.2f}\t").format(
+                    epoch+1, self.epochs, loss) + color.ENDC
+
                 if loss > 70:
                     loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.FAIL + "Loss: {:.2f}\t").format(
                         epoch+1, self.epochs, loss) + color.ENDC
@@ -90,17 +93,16 @@ class NeuralNetwork():
                         epoch+1, self.epochs, loss) + color.ENDC
 
                 epoch_prog, total_prog = self.get_progress(inputs, it)
+
                 progress_str = color.BOLD + 'Epoch Progress : |' + color.OKBLUE + epoch_prog + color.ENDC + '|\t' + \
                     color.BOLD + 'Total Progress : |' + color.OKBLUE + \
                     total_prog + color.ENDC + color.BOLD + '|' + color.ENDC
-                
+
                 if clear:
                     time.sleep(0.001)
                     print(chr(27) + "[2J")
 
                 print(loss_str + progress_str)
-
-                
 
                 it += self.batch_size
 
@@ -144,3 +146,5 @@ class NeuralNetwork():
         else:
             print(color.HEADER + color.BOLD + '- - - - Test accuracy : ' +
                   color.WARNING + '{:.2f}% - - - -'.format(acc*100) + color.ENDC)
+
+        return acc
