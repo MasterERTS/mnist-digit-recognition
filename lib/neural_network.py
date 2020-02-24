@@ -147,4 +147,4 @@ class NeuralNetwork():
             print(color.HEADER + color.BOLD + '- - - - Test accuracy : ' +
                   color.WARNING + '{:.2f}% - - - -'.format(acc*100) + color.ENDC)
 
-        return acc
+        return acc*100
