@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import numpy as np
 import lib.maths_util as mathlib
 from lib.colors import ColorsBook as color
