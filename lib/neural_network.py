@@ -1,5 +1,7 @@
 import numpy as np
 import lib.maths_util as mathlib
+from lib.colors import ColorsBook as color
+import time
 
 
 class NeuralNetwork():
@@ -12,6 +14,7 @@ class NeuralNetwork():
         self.weights = []
         self.biases = []
         self.loss = []
+        self.accuracy = []
         n_layers = len(layers)
 
         for i in range(n_layers - 1):
@@ -34,6 +37,11 @@ class NeuralNetwork():
 
         return loss
 
+    def accuracy_function(self, predicted_outputs, outputs):
+        acc = float(np.sum(np.argmax(predicted_outputs, 1) == outputs)) / \
+            float(len(outputs))
+        return acc
+
     def back_propagate(self, inputs, hidden_layer, predicted_outputs, outputs):
         delta_y = (predicted_outputs - outputs) / predicted_outputs.shape[0]
         delta_hidden_layer = np.dot(delta_y, self.weights[1].T)
@@ -54,21 +62,67 @@ class NeuralNetwork():
         self.weights[1] -= self.learning_rate * w2_grad
         self.biases[1] -= self.learning_rate * b2_grad
 
-    def fit(self, inputs, outputs):
+    def fit(self, inputs, outputs, clear = False):
         for epoch in range(self.epochs):
             it = 0
             while it < len(inputs):
                 inputs_batch = inputs[it:it+self.batch_size]
                 outputs_batch = outputs[it:it+self.batch_size]
                 hidden_layer, output_layer = self.feed_forward(inputs_batch)
+
                 loss = self.loss_function(output_layer, outputs_batch)
                 self.loss.append(loss)
+
                 self.back_propagate(inputs_batch, hidden_layer,
                                     output_layer, outputs_batch)
 
-                '''print('=== Epoch: {:d}/{:d}\tIteration:{:d}\tLoss: {:.2f} ==='.format(
-                    epoch+1, self.epochs, it+1, loss))'''
+                if loss > 70:
+                    loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.FAIL + "Loss: {:.2f}\t").format(
+                        epoch+1, self.epochs, loss) + color.ENDC
+                elif loss < 70 and loss > 10:
+                    loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.WARNING + "Loss: {:.2f}\t").format(
+                        epoch+1, self.epochs, loss) + color.ENDC
+                elif loss <= 10 and loss > 1:
+                    loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.OKGREEN + "Loss: {:.2f}\t").format(
+                        epoch+1, self.epochs, loss) + color.ENDC
+
+                epoch_prog, total_prog = self.get_progress(inputs, it)
+                progress_str = color.BOLD + 'Epoch Progress : |' + color.OKBLUE + epoch_prog + color.ENDC + '|\t' + \
+                    color.BOLD + 'Total Progress : |' + color.OKBLUE + \
+                    total_prog + color.ENDC + color.BOLD + '|' + color.ENDC
+                
+                if clear:
+                    time.sleep(0.001)
+                    print(chr(27) + "[2J")
+
+                print(loss_str + progress_str)
+
+                
+
                 it += self.batch_size
+
+    def get_progress(self, inputs, it):
+        epoch_bar = ''
+        total_bar = ''
+        total_it = len(inputs)/self.batch_size
+        epoch_bar_ticks = (it / (total_it)) * 10
+        total_bar_ticks = (it / (total_it * self.epochs)) * 5
+
+        while epoch_bar_ticks > 0:
+            epoch_bar += '█'
+            epoch_bar_ticks -= 1
+
+        while len(epoch_bar) < 10:
+            epoch_bar += ' '
+
+        while total_bar_ticks > 0:
+            total_bar += '█'
+            total_bar_ticks -= 1
+
+        while len(total_bar) < 5:
+            total_bar += ' '
+
+        return epoch_bar, total_bar
 
     def predict(self, inputs):
         hidden_layer, prediction = self.feed_forward(inputs)
@@ -78,4 +132,12 @@ class NeuralNetwork():
         prediction = self.predict(inputs)
         acc = float(np.sum(np.argmax(prediction, 1) == result)) / \
             float(len(result))
-        print('Test accuracy : {:.2f}%'.format(acc*100))
+        if (acc*100) > 85:
+            print(color.UNDERLINE + color.BOLD + '- - - - Test accuracy : ' +
+                  color.OKGREEN + '{:.2f}% - - - -'.format(acc*100) + color.ENDC)
+        elif (acc*100) < 50:
+            print(color.UNDERLINE + color.BOLD + '- - - - Test accuracy : ' + color.FAIL +
+                  '{:.2f}% - - - -'.format(acc*100) + color.ENDC)
+        else:
+            print(color.HEADER + color.BOLD + '- - - - Test accuracy : ' +
+                  color.WARNING + '{:.2f}% - - - -'.format(acc*100) + color.ENDC)
