@@ -33,7 +33,7 @@ def test_high_acc():
     nn = NeuralNetwork(layers, batch_size, epochs, learning_rate)
     nn.fit(normalized_inputs, normalized_outputs, False)
     acc = nn.accuracy_test(norm_test_inputs, norm_test_outputs)
-    assert(acc > 0.9)
+    assert(acc > 90)
 
 
 def test_low_acc():
@@ -56,11 +56,11 @@ def test_low_acc():
 
     layers = [784, 30, 10]
 
-    learning_rate = 0.1
+    learning_rate = 0.08
     batch_size = 1
-    epochs = 10
+    epochs = 5
 
     nn = NeuralNetwork(layers, batch_size, epochs, learning_rate)
     nn.fit(normalized_inputs, normalized_outputs, False)
     acc = nn.accuracy_test(norm_test_inputs, norm_test_outputs)
-    assert(acc > 0.6)
+    assert(acc > 60)
