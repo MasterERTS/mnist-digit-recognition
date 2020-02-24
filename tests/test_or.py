@@ -56,7 +56,7 @@ def test_low_acc():
 
     layers = [784, 30, 10]
 
-    learning_rate = 0.08
+    learning_rate = 0.01
     batch_size = 1
     epochs = 5
 
