@@ -27,6 +27,17 @@ Based on handwritten digits - which a sampled is displayed hereinabove -  stored
 * Use none-MNIST handwritten digit as inputs
 * Any more ideas ? Open an Issue !
 
+## Loss and Accuracy
+
+For a batch size of one, five epochs and a learning rate of 0.01, we get these graphs :
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/master-coro/mnist-digit-recognition/master/res/lossfunction.png">
+</p>
+<p align="center">
+<img src="https://raw.githubusercontent.com/master-coro/mnist-digit-recognition/master/res/accuracyfunction.png">
+</p>
+
 ## Setup
 
 To setup the project on your local machine:
