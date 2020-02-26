@@ -20,14 +20,22 @@ def print_random_image():
     plt.title(testing_labels[picked_image])
     plt.show()
 
-
-def plot_accuracy(NeuralNetwork):
+def plot_loss(NeuralNetwork):
     y = NeuralNetwork.loss
     plt.plot(y)
     plt.ylabel('Loss function')
     plt.xlabel('Number of iterations')
     plt.xticks(rotation=60)
     plt.title('Loss function w.r.t. number of iterations')
+    plt.show()
+
+def plot_accuracy(NeuralNetwork):
+    y = NeuralNetwork.accuracy
+    plt.plot(y)
+    plt.ylabel('Accuracy function')
+    plt.xlabel('Number of iterations')
+    plt.xticks(rotation=60)
+    plt.title('Accuracy function w.r.t. number of iterations')
     plt.show()
 
 def main():
@@ -54,9 +62,11 @@ def main():
     epochs = 5
 
     nn = NeuralNetwork(layers, batch_size, epochs, learning_rate)
-    nn.fit(normalized_inputs, normalized_outputs, False)
-    nn.accuracy_test(norm_test_inputs, norm_test_outputs)
+    #nn.fit(normalized_inputs, normalized_outputs)
+    nn.fit_test(normalized_inputs, normalized_outputs, norm_test_inputs, norm_test_outputs, True)
+    nn.time_stamps_test()
 
+    plot_loss(nn)
     plot_accuracy(nn)
 
 if __name__ == "__main__":

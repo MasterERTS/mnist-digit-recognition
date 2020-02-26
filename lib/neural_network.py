@@ -25,6 +25,16 @@ class NeuralNetwork():
                 0, 1, [self.layers[i], self.layers[i+1]]))
             self.biases.append(np.zeros((1, self.layers[i+1])))
 
+        self.iteration_time = dict()
+        self.epochs_time = dict()
+        self.total_time = dict()
+
+        self.iteration_time['test'] = []
+        self.iteration_time['train'] = []
+
+        self.epochs_time['test'] = []
+        self.epochs_time['train'] = []
+
     def feed_forward(self, inputs):
 
         layer0 = inputs
@@ -65,10 +75,16 @@ class NeuralNetwork():
         self.weights[1] -= self.learning_rate * w2_grad
         self.biases[1] -= self.learning_rate * b2_grad
 
-    def fit(self, inputs, outputs, clear=False):
+    def fit(self, inputs, outputs, timing=False, clear=False):
+        if timing:
+            stamp_total = time.clock()
         for epoch in range(self.epochs):
+            if timing:
+                stamp_epoch = time.clock()
             it = 0
             while it < len(inputs):
+                if timing:
+                    stamp_it = time.clock()
                 inputs_batch = inputs[it:it+self.batch_size]
                 outputs_batch = outputs[it:it+self.batch_size]
                 hidden_layer, output_layer = self.feed_forward(inputs_batch)
@@ -105,13 +121,78 @@ class NeuralNetwork():
                 print(loss_str + progress_str)
 
                 it += self.batch_size
+                if timing:
+                    self.iteration_time['train'].append(time.clock() - stamp_it)
+            if timing: 
+                self.epochs_time['train'].append(time.clock() - stamp_epoch)
+        if timing:
+            self.total_time['train'] = time.clock() - stamp_total
+
+
+    def fit_test(self, inputs, outputs, test_in, test_out, timing=False, clear=False):
+        if timing:
+            stamp_total = time.clock()
+        for epoch in range(self.epochs):
+            if timing:
+                stamp_epoch = time.clock()
+            it = 0
+            while it < len(inputs):
+                if timing:
+                    stamp_it = time.clock()
+                inputs_batch = inputs[it:it+self.batch_size]
+                outputs_batch = outputs[it:it+self.batch_size]
+                hidden_layer, output_layer = self.feed_forward(inputs_batch)
+
+                loss = self.loss_function(output_layer, outputs_batch)
+                self.loss.append(loss)
+
+                test_prediction = self.predict(test_in)
+                accuracy = self.accuracy_function(test_prediction, test_out)
+                self.accuracy.append(accuracy)
+
+                self.back_propagate(inputs_batch, hidden_layer,
+                                    output_layer, outputs_batch)
+
+                loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.OKBLUE + "Loss: {:.2f}\t").format(
+                    epoch+1, self.epochs, loss) + color.ENDC
+
+                if loss > 70:
+                    loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.FAIL + "Loss: {:.2f}\t").format(
+                        epoch+1, self.epochs, loss) + color.ENDC
+                elif loss < 70 and loss > 10:
+                    loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.WARNING + "Loss: {:.2f}\t").format(
+                        epoch+1, self.epochs, loss) + color.ENDC
+                elif loss <= 10 and loss > 1:
+                    loss_str = ("- - - - " + color.BOLD + "Epoch: {:d}/{:d}\t" + color.OKGREEN + "Loss: {:.2f}\t").format(
+                        epoch+1, self.epochs, loss) + color.ENDC
+
+                epoch_prog, total_prog = self.get_progress(inputs, it)
+
+                progress_str = color.BOLD + 'Epoch Progress : |' + color.OKBLUE + epoch_prog + color.ENDC + '|\t' + \
+                    color.BOLD + 'Total Progress : |' + color.OKBLUE + \
+                    total_prog + color.ENDC + color.BOLD + '|' + color.ENDC
+
+                if clear:
+                    time.sleep(0.001)
+                    print(chr(27) + "[2J")
+
+                print(loss_str + progress_str)
+
+                it += self.batch_size
+                if timing:
+                    self.iteration_time['test'].append(time.clock() - stamp_it)
+            if timing: 
+                self.epochs_time['test'].append(time.clock() - stamp_epoch)
+        if timing:
+            self.total_time['test'] = time.clock() - stamp_total
+
 
     def get_progress(self, inputs, it):
         epoch_bar = ''
         total_bar = ''
         total_it = len(inputs)/self.batch_size
         epoch_bar_ticks = (it / (total_it)) * 10
-        total_bar_ticks = (it / (total_it * self.epochs)) * 5
+        total_bar_ticks = (it / (total_it * self.epochs)) * 3
 
         while epoch_bar_ticks > 0:
             epoch_bar += '█'
@@ -124,7 +205,7 @@ class NeuralNetwork():
             total_bar += '█'
             total_bar_ticks -= 1
 
-        while len(total_bar) < 5:
+        while len(total_bar) < 3:
             total_bar += ' '
 
         return epoch_bar, total_bar
@@ -148,3 +229,10 @@ class NeuralNetwork():
                   color.WARNING + '{:.2f}% - - - -'.format(acc*100) + color.ENDC)
 
         return acc*100
+
+    def time_stamps_test(self, test_or_train):
+        average_it_stamp = sum(self.iteration_time[test_or_train]) / len(self.iteration_time[test_or_train])
+        average_epochs_stamp = sum(self.epochs_time[test_or_train]) / len(self.epochs_time[test_or_train])
+        print(color.BOLD + "\n= = = = Iteration Average Duration:" + color.UNDERLINE + " {:.2f} secs.".format(average_it_stamp))
+        print(color.BOLD + "= = = = Epoch Average Duration:" + color.UNDERLINE + " {:.2f} secs.".format(average_epochs_stamp))
+        print(color.BOLD + "= = = = Total Duration:" + color.UNDERLINE + " {:.2f} secs.".format(self.total_time[test_or_train]))
