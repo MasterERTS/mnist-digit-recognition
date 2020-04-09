@@ -62,12 +62,8 @@ def main():
     epochs = 5
 
     nn = NeuralNetwork(layers, batch_size, epochs, learning_rate)
-    #nn.fit(normalized_inputs, normalized_outputs)
-    nn.fit_test(normalized_inputs, normalized_outputs, norm_test_inputs, norm_test_outputs, True)
+    nn.fit(normalized_inputs, normalized_outputs)
     nn.time_stamps_test()
-
-    plot_loss(nn)
-    plot_accuracy(nn)
 
 if __name__ == "__main__":
     main()
